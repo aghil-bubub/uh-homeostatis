@@ -490,7 +490,7 @@ function Q5({ value, onChange }: { value: number | null; onChange: (v: number) =
       <div className="rounded-2xl border border-border bg-card p-5">
         <Slider
           value={[current]}
-          onValueChange={(v) => onChange(v[0])}
+          onValueChange={(v) => onChange(v[0] ?? 0)}
           min={0}
           max={2}
           step={1}
