@@ -5,8 +5,6 @@ export function NeuronDiagram({
   selected?: string;
   onSelect: (id: string) => void;
 }) {
-  const stroke = (id: string) =>
-    selected === id ? "var(--foreground)" : "transparent";
 
   const hotspot = (id: string, cx: number, cy: number, rx: number, ry: number) => (
     <ellipse
