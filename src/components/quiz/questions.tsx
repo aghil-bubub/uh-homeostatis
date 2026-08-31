@@ -193,19 +193,23 @@ export function isQuestionAnswered(index: number, a: Answers): boolean {
   }
 }
 
+// Skor otomatis hanya untuk Soal 1-9 (maksimal 92 poin).
+// Soal 10 adalah refleksi janji sehat — dinilai manual oleh guru, tidak masuk skor otomatis.
+export const MAX_SCORE = 92;
+const SCORED_QUESTIONS = 9;
+
 export function computeScore(a: Answers): number {
   let correct = 0;
   if (a.q1.join(",") === REFLEX_ORDER.join(",")) correct++;
   if (a.q2 === "mielin") correct++;
   if (a.q3.a === true && a.q3.b === true && a.q3.c === false) correct++;
   if (MATCH_LEFT.every((l) => a.q4[l.id] === MATCH_KEY[l.id])) correct++;
-  if (a.q5 === 1) correct++;
+  if (a.q5 === TEMP_TARGET) correct++;
   if (a.q6 === "a") correct++;
   if (a.q7 === "a") correct++;
   if (a.q8 === "a") correct++;
   if (a.q9.length === 2 && a.q9.includes("cepat") && a.q9.includes("listrik")) correct++;
-  if (a.q10.trim().length >= 3) correct++;
-  return Math.round((correct / TOTAL_QUESTIONS) * 100);
+  return Math.round((correct / SCORED_QUESTIONS) * MAX_SCORE);
 }
 
 /* ---------------- shared bits ---------------- */
@@ -485,7 +489,11 @@ function Q4({
 }
 
 function Q5({ value, onChange }: { value: number | null; onChange: (v: number) => void }) {
-  const current = value ?? 0;
+  const current = value ?? TEMP_START;
+  const activeResponse = TEMP_RESPONSES.find((r) => r.match(current))!;
+  const isHot = current > TEMP_TARGET;
+  const isOk = current === TEMP_TARGET;
+
   return (
     <div className="space-y-5">
       <Narrative>
@@ -494,36 +502,78 @@ function Q5({ value, onChange }: { value: number | null; onChange: (v: number) =
         mengeksekusi mekanisme pertahanan.
       </Narrative>
       <Instruction>
-        Geser slider respon tubuh ke opsi yang BENAR untuk mengembalikan suhu tubuh ke kondisi
-        seimbang 37°C!
+        Geser slider suhu dengan mulus hingga pas di angka 37°C — kondisi seimbang tubuh — dan
+        perhatikan mekanisme respons tubuh yang aktif: "Mengeluarkan Keringat & Pembuluh Darah
+        Melebar" adalah respons untuk MEMBUANG panas berlebih.
       </Instruction>
+
       <div className="flex items-center gap-4 rounded-2xl bg-secondary/50 p-4">
         <ThermoIcon />
         <div className="min-w-0">
-          <p className="text-2xl font-black text-destructive">39°C</p>
-          <p className="text-xs text-muted-foreground">Target keseimbangan: 37°C</p>
+          <p
+            className={`text-3xl font-black transition-colors ${
+              isOk ? "text-success" : isHot ? "text-destructive" : "text-accent"
+            }`}
+          >
+            {current}°C
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {isOk
+              ? "Suhu seimbang! Homeostasis tercapai."
+              : isHot
+                ? "Tubuh kepanasan — buang panas!"
+                : "Tubuh kedinginan — pertahankan panas!"}
+          </p>
         </div>
       </div>
+
       <div className="rounded-2xl border border-border bg-card p-5">
         <Slider
           value={[current]}
-          onValueChange={(v) => onChange(v[0] ?? 0)}
-          min={0}
-          max={2}
+          onValueChange={(v) => onChange(v[0] ?? TEMP_START)}
+          min={TEMP_MIN}
+          max={TEMP_MAX}
           step={1}
-          aria-label="Pilihan respon tubuh"
+          aria-label="Slider suhu tubuh dalam derajat Celcius"
         />
+        <div className="mt-2 flex justify-between text-[11px] font-bold text-muted-foreground">
+          {Array.from({ length: TEMP_MAX - TEMP_MIN + 1 }, (_, i) => TEMP_MIN + i).map((t) => (
+            <span
+              key={t}
+              className={
+                t === current
+                  ? isOk
+                    ? "text-success"
+                    : isHot
+                      ? "text-destructive"
+                      : "text-accent"
+                  : ""
+              }
+            >
+              {t}°
+            </span>
+          ))}
+        </div>
+
         <div className="mt-5 space-y-2">
-          {SLIDER_OPTIONS.map((opt, i) => (
+          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Mekanisme Respons Tubuh (berubah mengikuti slider)
+          </span>
+          {TEMP_RESPONSES.map((r) => (
             <div
-              key={opt}
-              className={`rounded-xl px-3 py-2 text-sm transition-colors ${
-                value === i
-                  ? "bg-primary/10 font-bold text-foreground"
-                  : "text-muted-foreground"
+              key={r.id}
+              className={`rounded-xl border px-3 py-2.5 text-sm transition-all ${
+                activeResponse.id === r.id
+                  ? r.id === "stabil"
+                    ? "border-success bg-success/10 font-bold text-foreground"
+                    : "border-primary bg-primary/10 font-bold text-foreground"
+                  : "border-transparent text-muted-foreground"
               }`}
             >
-              {i + 1}. {opt}
+              {r.text}
+              {activeResponse.id === r.id && (
+                <span className="ml-2 text-xs font-semibold text-primary">◀ aktif</span>
+              )}
             </div>
           ))}
         </div>
