@@ -71,8 +71,7 @@ export function NeuronDiagram({
           aria-label="Klik area Akson"
         >
           <rect x="192" y="110" width="330" height="20" rx="10" fill="var(--chart-2)" opacity="0.55" />
-          {hotspot("akson", 357, 190, 175, 26)}
-          <rect x="182" y="164" width="350" height="52" fill="transparent" />
+          {hotspot("akson", 278, 120, 14, 22)}
         </g>
 
         {/* Selubung mielin */}
