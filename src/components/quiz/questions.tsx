@@ -64,10 +64,27 @@ const MATCH_KEY: Record<string, string> = {
   sumsum: "refleks",
 };
 
-const SLIDER_OPTIONS = [
-  "Menggigil & Pembuluh Darah Menyempit",
-  "Mengeluarkan Keringat & Pembuluh Darah Melebar",
-  "Berhenti Bernapas Sejenak & Otot Mengejang",
+const TEMP_MIN = 35;
+const TEMP_MAX = 40;
+const TEMP_TARGET = 37;
+const TEMP_START = 39;
+
+const TEMP_RESPONSES = [
+  {
+    id: "dingin",
+    text: "Menggigil & Pembuluh Darah Menyempit",
+    match: (t: number) => t < TEMP_TARGET,
+  },
+  {
+    id: "stabil",
+    text: "Suhu Seimbang — Mekanisme Pendinginan Tetap Aktif",
+    match: (t: number) => t === TEMP_TARGET,
+  },
+  {
+    id: "panas",
+    text: "Mengeluarkan Keringat & Pembuluh Darah Melebar",
+    match: (t: number) => t > TEMP_TARGET,
+  },
 ];
 
 const HOMEOSTASIS_CARDS = [
