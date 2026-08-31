@@ -5,16 +5,23 @@ export function NeuronDiagram({
   selected?: string;
   onSelect: (id: string) => void;
 }) {
-  const parts: { id: string; label: string }[] = [
-    { id: "dendrit", label: "Dendrit" },
-    { id: "badan-sel", label: "Badan Sel" },
-    { id: "akson", label: "Akson" },
-    { id: "mielin", label: "Selubung Mielin" },
-    { id: "terminal", label: "Terminal Akson" },
-  ];
-
   const stroke = (id: string) =>
     selected === id ? "var(--foreground)" : "transparent";
+
+  const hotspot = (id: string, cx: number, cy: number, rx: number, ry: number) => (
+    <ellipse
+      cx={cx}
+      cy={cy}
+      rx={rx}
+      ry={ry}
+      fill="transparent"
+      stroke={selected === id ? "var(--foreground)" : "var(--primary)"}
+      strokeWidth="2.5"
+      strokeDasharray="6 5"
+      opacity={selected === id ? 1 : 0.35}
+      className="pointer-events-none"
+    />
+  );
 
   return (
     <div className="space-y-3">
